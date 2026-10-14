@@ -7,8 +7,13 @@ const port = Number(process.env.PORT || 3000);
 const model = process.env.OPENAI_MODEL || 'gpt-6-luna';
 const keyFile = path.join(root, 'api_keys', 'openai.txt.txt');
 
+function parseKey(value) {
+  const line = String(value || '').trim().split(/\r?\n/).find(part => part.trim() && !part.trim().startsWith('#'))?.trim() || '';
+  return line.replace(/^(?:export\s+)?OPENAI_API_KEY\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
+}
+
 function apiKey() {
-  return (process.env.OPENAI_API_KEY || (fs.existsSync(keyFile) ? fs.readFileSync(keyFile, 'utf8') : '')).trim();
+  return parseKey(process.env.OPENAI_API_KEY || (fs.existsSync(keyFile) ? fs.readFileSync(keyFile, 'utf8') : ''));
 }
 
 function send(res, status, body, type = 'application/json; charset=utf-8') {
@@ -59,7 +64,15 @@ async function plan(input, key) {
       })
     });
     const response = await upstream.json();
-    if (!upstream.ok) throw new Error(response.error?.message || `Model request failed (${upstream.status}).`);
+    if (!upstream.ok) {
+      if (upstream.status === 401) throw new Error('The API key was rejected. Check the key in api_keys/openai.txt.txt.');
+      if (upstream.status === 403) throw new Error('This API key does not have access to the selected model.');
+      if (upstream.status === 429 && (response.error?.code === 'credit_balance_exhausted' || response.error?.type === 'insufficient_quota')) {
+        throw new Error('The OpenAI API credit balance is exhausted. Add credits or use another funded API key.');
+      }
+      if (upstream.status === 429) throw new Error('The API rate limit was reached. Try again later.');
+      throw new Error(`Model request failed (${upstream.status}).`);
+    }
     const result = JSON.parse(outputText(response));
     if (!Array.isArray(result.steps) || !result.steps.length) throw new Error('The model returned an empty plan. Try again.');
     const total = result.steps.reduce((sum, step) => sum + step.minutes, 0);
@@ -99,4 +112,4 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) server.listen(port, '127.0.0.1', () => console.log(`NextStep is ready at http://127.0.0.1:${port}`));
-module.exports = { server, validate, outputText };
+module.exports = { server, validate, outputText, parseKey };
