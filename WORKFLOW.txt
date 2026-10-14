@@ -1,0 +1,28 @@
+BUS4498 Option 2 — Turn overwhelming study tasks into next steps
+
+TRIGGER
+Student enters study tasks, any known deadlines or blockers, available study minutes, and energy level.
+
+TASK SEQUENCE
+1. The app checks that the input and time budget are usable.
+2. The running app sends the workload and constraints to an OpenAI model. The model identifies a practical starting point, breaks large work into 2–6 concrete actions, prioritizes stated deadlines and blockers, and defers work that will not fit. This is the main AI task (a possible Level 3 task because it reasons across competing constraints).
+3. The app checks that the returned step durations fit the time budget.
+4. The app shows a first action, a timed checklist, deferred tasks, and one clarification if key information is missing.
+5. The student marks steps complete and begins studying.
+
+ENDPOINT
+A short plan the student can act on immediately during the time they have today.
+
+MODEL AND TOOLS
+OpenAI Responses API with gpt-6-luna: a focused, low-cost text model for task decomposition. JSON schema gives the app predictable fields. A local Node.js server keeps the API key out of the browser. The browser supplies a responsive interface and checklist. No external calendar or task app is needed for this local demonstration.
+
+SKILL DECISION
+No reusable skill is planned. This app has one narrow workflow; a versioned server instruction and output schema already keep its approach and format consistent. A skill could be added if the team later supports multiple assignment types or outputs.
+
+TEAM DEMO (3 MINUTES)
+Partner A (about 75 sec): State the student's problem, show this sketch, enter fictional assignments with deadlines and 60 available minutes.
+Partner B (about 75 sec): Generate the plan live, explain the first action, timed steps, deferred tasks, and checklist. Explain the model and local server.
+Together (about 30 sec): Explain the no-skill choice and limitations: student-entered deadlines must be checked; the plan is advice, not a calendar booking; it requires internet and an API key.
+
+PREP BEFORE OCTOBER 16
+Add a valid API key, rehearse with fictional tasks, and verify a live model response on the demo machine.
