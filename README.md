@@ -33,10 +33,11 @@ The repository follows the team template: `our_team_agent/` contains `agent/`, `
 
 1. Put a valid OpenAI API key in `api_keys/openai.txt.txt` as a bare key or `OPENAI_API_KEY="..."` line, or set the `OPENAI_API_KEY` environment variable. The `api_keys` folder is excluded by `.gitignore`.
 2. Run `node our_team_agent/agent/app/server.js` in this repository folder.
-3. Open `http://127.0.0.1:3000` and enter fictional study tasks, available minutes, and energy level.
-4. Select **Make my plan** and review the proposed steps.
+3. Open `http://127.0.0.1:3000`. Add each big study task, its estimated minutes, optional due date, and known work breakdown (one step per line).
+4. Choose a study day in the calendar, start time, available minutes, and energy level. The task draft and study block are saved in this browser.
+5. Select **Generate with AI** and review the proposed timed steps.
 
-The running app uses `gpt-6-luna` through the OpenAI Responses API to create the plan. The Node.js server validates inputs and output and keeps the key out of the browser. A live plan requires internet and available API credits. The app does not save plans or automatically retry failed requests.
+The running app uses `gpt-6-luna` through the OpenAI Responses API to create the plan. The Node.js server validates inputs and output and keeps the key out of the browser. A live AI plan requires internet and available API credits. The calendar and task draft can be edited without API access; no generated plan is saved or silently substituted when an API call fails. The app does not automatically retry failed requests.
 
 ## Skill Decision
 
