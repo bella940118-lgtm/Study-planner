@@ -1,2 +1,2 @@
-The current workflow and rendered Mermaid diagram are in WORKFLOW.md.
-https://github.com/bella940118-lgtm/Study-planner/blob/main/WORKFLOW.md
+The current workflow and rendered Mermaid diagram are in our_team_agent/agent/workflow-of-tasks.md.
+https://github.com/bella940118-lgtm/Study-planner/blob/main/our_team_agent/agent/workflow-of-tasks.md
