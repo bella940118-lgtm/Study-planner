@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NextStep · Study planner</title><link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header><div class="brand"><span class="mark">✳</span> NextStep</div><span class="tag">A calmer way to start</span></header>
+    <section class="hero"><div class="eyebrow">STUDY PLANNER</div><h1>Too much to do?<br><em>Find your first step.</em></h1><p>Tell us what is on your plate. Get a short, realistic plan for the time you have today.</p></section>
+    <div class="layout">
+      <section class="card input-card" aria-labelledby="input-title">
+        <div class="card-head"><div><span class="number">01</span><h2 id="input-title">Your workload</h2></div><span class="subtle">Start messy. That's okay.</span></div>
+        <form id="plan-form">
+          <label for="tasks">What are you studying or working on?</label>
+          <textarea id="tasks" maxlength="6000" required placeholder="e.g. Biology quiz Friday: 3 chapters to review. History essay due Monday: no outline yet. Calculus problem set due tomorrow: 8 questions left."></textarea>
+          <div class="row"><div><label for="minutes">Time available today</label><select id="minutes"><option value="25">25 minutes</option><option value="45">45 minutes</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select></div><div><label for="energy">Energy level</label><select id="energy"><option value="low">Low — keep it light</option><option value="medium" selected>Medium</option><option value="high">High — I can focus</option></select></div></div>
+          <button type="submit" id="submit">Make my plan <span>↗</span></button>
+          <p class="hint">Uses an AI model to break down your tasks. Check deadlines and details before acting.</p>
+        </form>
+      </section>
+      <section class="card result-card" id="results" aria-live="polite" aria-labelledby="result-title">
+        <div class="card-head"><div><span class="number">02</span><h2 id="result-title">Your next steps</h2></div><span class="subtle" id="result-time">Made for today</span></div>
+        <div id="empty" class="empty"><div class="empty-art">↗</div><h3>Start with what you know.</h3><p>Your plan will appear here, one doable step at a time.</p></div>
+        <div id="output" hidden></div><p id="error" class="error" role="alert" hidden></p>
+      </section>
+    </div>
+    <footer><span>Small steps count.</span><span>Local demo · BUS4498 Option 2</span></footer>
+  </main><script src="/app.js"></script>
+</body>
+</html>
