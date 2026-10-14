@@ -1,31 +1,53 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NextStep · Study planner</title><link rel="stylesheet" href="/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NextStep — Study workspace</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <main class="shell">
-    <header><div class="brand"><span class="mark">✳</span> NextStep</div><span class="tag">A calmer way to start</span></header>
-    <section class="hero"><div class="eyebrow">STUDY PLANNER</div><h1>Too much to do?<br><em>Find your first step.</em></h1><p>Tell us what is on your plate. Get a short, realistic plan for the time you have today.</p></section>
-    <div class="layout">
-      <section class="card input-card" aria-labelledby="input-title">
-        <div class="card-head"><div><span class="number">01</span><h2 id="input-title">Your workload</h2></div><span class="subtle">Start messy. That's okay.</span></div>
-        <form id="plan-form">
-          <label for="tasks">What are you studying or working on?</label>
-          <textarea id="tasks" maxlength="6000" required placeholder="e.g. Biology quiz Friday: 3 chapters to review. History essay due Monday: no outline yet. Calculus problem set due tomorrow: 8 questions left."></textarea>
-          <div class="row"><div><label for="minutes">Time available today</label><select id="minutes"><option value="25">25 minutes</option><option value="45">45 minutes</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select></div><div><label for="energy">Energy level</label><select id="energy"><option value="low">Low — keep it light</option><option value="medium" selected>Medium</option><option value="high">High — I can focus</option></select></div></div>
-          <button type="submit" id="submit">Make my plan <span>↗</span></button>
-          <p class="hint">Uses an AI model to break down your tasks. Check deadlines and details before acting.</p>
-        </form>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="NextStep home"><span class="brand-mark">✳</span><span>NextStep<small>STUDY WORKSPACE</small></span></a>
+      <span class="top-note">Make space for what matters.</span>
+    </header>
+
+    <section class="intro">
+      <div><p class="eyebrow">YOUR STUDY DESK</p><h1>A clearer way to <em>get it done.</em></h1><p class="intro-copy">List the big things, break them into smaller actions, and choose when you want to study. Your draft stays in this browser.</p></div>
+      <div class="overview" aria-label="Workload overview"><div><strong id="task-count">0</strong><span>tasks</span></div><div><strong id="estimate-total">0h</strong><span>estimated work</span></div><div><strong id="breakdown-count">0</strong><span>small steps</span></div></div>
+    </section>
+
+    <div class="workspace">
+      <section class="panel tasks-panel" aria-labelledby="tasks-title">
+        <div class="panel-heading"><div><p class="section-kicker">01 / CAPTURE</p><h2 id="tasks-title">Your workload</h2><p>Give each big task its own card. Add the steps you already know.</p></div><button class="outline-button" type="button" id="add-task">+ Add task</button></div>
+        <div id="task-list" class="task-list"></div>
+        <p class="panel-footnote">Tip: Put one small action on each line. The AI can suggest more detail when your API is available.</p>
       </section>
-      <section class="card result-card" id="results" aria-live="polite" aria-labelledby="result-title">
-        <div class="card-head"><div><span class="number">02</span><h2 id="result-title">Your next steps</h2></div><span class="subtle" id="result-time">Made for today</span></div>
-        <div id="empty" class="empty"><div class="empty-art">↗</div><h3>Start with what you know.</h3><p>Your plan will appear here, one doable step at a time.</p></div>
-        <div id="output" hidden></div><p id="error" class="error" role="alert" hidden></p>
-      </section>
+
+      <aside class="panel calendar-panel" aria-labelledby="calendar-title">
+        <div class="panel-heading compact"><div><p class="section-kicker">02 / MAKE TIME</p><h2 id="calendar-title">Your study calendar</h2><p>Pick a day and set aside a study block.</p></div></div>
+        <div class="month-nav"><button type="button" id="prev-month" aria-label="Previous month">‹</button><strong id="month-label"></strong><button type="button" id="next-month" aria-label="Next month">›</button></div>
+        <div class="calendar-weekdays" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div id="calendar-grid" class="calendar-grid" role="group" aria-label="Choose a study date"></div>
+        <div class="calendar-legend"><span><i class="legend-dot due-dot"></i>Task due</span><span><i class="legend-dot study-dot"></i>Study block</span></div>
+        <div class="session-card"><div class="session-head"><span class="session-icon">◷</span><div><small>STUDY BLOCK</small><strong id="selected-date-label"></strong></div></div>
+          <div class="field-grid"><div class="field"><label for="study-date">Date</label><input id="study-date" type="date"></div><div class="field"><label for="start-time">Start time</label><input id="start-time" type="time" value="16:00"></div></div>
+          <div class="field-grid"><div class="field"><label for="minutes">Time available</label><select id="minutes"><option value="25">25 minutes</option><option value="45">45 minutes</option><option value="60" selected>1 hour</option><option value="90">1½ hours</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option><option value="480">8 hours</option></select></div><div class="field"><label for="energy">Energy</label><select id="energy"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div></div>
+          <p id="session-summary" class="session-summary"></p>
+        </div>
+        <div id="day-due" class="day-due"></div>
+      </aside>
     </div>
-    <footer><span>Small steps count.</span><span>Local demo · BUS4498 Option 2</span></footer>
-  </main><script src="/app.js"></script>
+
+    <section class="panel plan-panel" aria-labelledby="plan-title"><div class="panel-heading"><div><p class="section-kicker">03 / FIND YOUR NEXT STEP</p><h2 id="plan-title">Make a focused plan</h2><p>Your workload and chosen study block become a timed checklist.</p></div><button id="submit" class="primary-button" type="button">Generate with AI <span>↗</span></button></div>
+      <div class="plan-note"><span class="info-icon">i</span><p>The AI planner needs an OpenAI API key with available credits. Your task cards and calendar still work if the API is unavailable.</p></div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <div id="empty" class="empty-plan"><span>↗</span><div><strong>Your plan will appear here.</strong><p>Start with a task, then generate a plan for the study block you selected.</p></div></div>
+      <div id="output" hidden></div>
+    </section>
+    <footer><span>NextStep · BUS4498 Option 2</span><span>Plan thoughtfully. Adjust as you go.</span></footer>
+  </main>
+  <script src="/app.js"></script>
 </body>
 </html>
