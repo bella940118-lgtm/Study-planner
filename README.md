@@ -27,10 +27,12 @@ Students with competing study priorities can begin work sooner and see a realist
 | [Task Specifications](our_team_agent/agent/task-specs) | Inputs, outputs, tools, boundaries, and failure handling for each task |
 | [Demo Plan](our_team_agent/docs/demo-plan.md) | Three-minute showcase outline and readiness check |
 
+The repository follows the team template: `our_team_agent/` contains `agent/`, `docs/`, and `.gitkeep`; the root contains this README and an MIT `LICENSE`. The running app lives in `our_team_agent/agent/app/`. The root `.gitignore` excludes the local API key.
+
 ## Run Locally
 
 1. Put a valid OpenAI API key in `api_keys/openai.txt.txt` as a bare key or `OPENAI_API_KEY="..."` line, or set the `OPENAI_API_KEY` environment variable. The `api_keys` folder is excluded by `.gitignore`.
-2. Run `node server.js` in this repository folder.
+2. Run `node our_team_agent/agent/app/server.js` in this repository folder.
 3. Open `http://127.0.0.1:3000` and enter fictional study tasks, available minutes, and energy level.
 4. Select **Make my plan** and review the proposed steps.
 
