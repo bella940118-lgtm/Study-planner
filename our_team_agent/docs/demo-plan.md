@@ -12,13 +12,9 @@
 | --- | --- | --- |
 | 0:00–0:45 | Partner A | State the Option 2 problem and show the [workflow diagram](../agent/workflow-of-tasks.md#5-workflow-diagram). |
 | 0:45–1:30 | Partner A | Enter fictional assignments with deadlines, 60 available minutes, and an energy level. |
-| 1:30–2:30 | Partner B | Generate a plan, explain its first step, timed checklist, deferred work, and optional question. Mark a step complete. |
+| 1:30–2:30 | Partner B | Generate a plan, explain its first step, timed checklist, and deferred work. If the planner asks a question, answer it and refine the plan. Mark a step complete. |
 | 2:30–3:00 | Both | Explain the model and local server, the no-Skill decision, and the need to verify deadlines and assignment details. |
 
-## Current Readiness Limit
+## Readiness Check
 
-NextStep now uses the Groq Chat Completions API with the `openai/gpt-oss-20b` model.
-
-The server has been updated to use Groq, but the live AI workflow still needs to be tested locally with a valid `GROQ_API_KEY`.
-
-Before class, verify that the app generates a real study plan, respects the available time, and displays actionable steps.
+NextStep uses the Claude Messages API with `claude-haiku-5-5` by default. Before class, verify that the local API key and credits are available, the app generates a real study plan within the available time, and deferred work is specific. If a question appears, verify that answering it refines the plan.

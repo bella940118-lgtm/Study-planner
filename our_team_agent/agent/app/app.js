@@ -51,6 +51,7 @@ const state = readDraft();
 let visibleMonth = new Date(dateFrom(state.date).getFullYear(), dateFrom(state.date).getMonth(), 1);
 let currentPlan = null;
 let completedSteps = [];
+let refinementNote = '';
 
 function save() {
   try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) { /* Editing still works without storage. */ }
@@ -60,7 +61,7 @@ function draftFingerprint() { return JSON.stringify(state); }
 
 function saveCurrentPlan() {
   if (!currentPlan) return;
-  try { localStorage.setItem(planStorageKey, JSON.stringify({ draft: draftFingerprint(), plan: currentPlan, completed: completedSteps })); }
+  try { localStorage.setItem(planStorageKey, JSON.stringify({ draft: draftFingerprint(), plan: currentPlan, completed: completedSteps, refinementNote })); }
   catch (_) { /* The plan remains usable in this tab when storage is blocked. */ }
 }
 
@@ -168,7 +169,7 @@ function renderCalendar() {
 }
 
 function invalidatePlan() {
-  currentPlan = null; completedSteps = [];
+  currentPlan = null; completedSteps = []; refinementNote = '';
   try { localStorage.removeItem(planStorageKey); } catch (_) { /* Draft editing still works without storage. */ }
   if (!$('#output').hidden) {
     $('#output').hidden = true; $('#output').replaceChildren(); $('#empty').hidden = false;
@@ -241,10 +242,12 @@ function updatePlanProgress() {
   $('#plan-progress').textContent = `${done} of ${currentPlan.steps.length} items complete · ${formatPlanMinutes(minutes)} done`;
 }
 
-function renderPlan(plan, completed = []) {
+function renderPlan(plan, completed = [], note = '') {
   currentPlan = plan;
   completedSteps = plan.steps.map((_, index) => Boolean(completed[index]));
+  refinementNote = note;
   const output = $('#output'); output.replaceChildren();
+  if (note) output.append(node('p', 'plan-refined', note));
   const lead = node('div', 'plan-lead'); lead.append(node('span', 'section-kicker', 'START HERE'), node('h3', '', plan.first_step), node('p', '', plan.headline)); output.append(lead);
   const summary = node('div', 'plan-time-summary');
   for (const [label, value, className] of [
@@ -271,8 +274,24 @@ function renderPlan(plan, completed = []) {
     row.append(checkbox, body, timing); checklist.append(row);
   });
   output.append(checklist);
-  if (plan.later?.length) output.append(node('p', 'plan-after', `Later: ${plan.later.join(' · ')}`));
-  if (plan.clarifying_question) output.append(node('p', 'plan-after', `Check: ${plan.clarifying_question}`));
+  if (plan.later?.length) {
+    const later = node('section', 'plan-later');
+    later.append(node('h3', '', 'Save for another study session'));
+    const list = node('ul');
+    plan.later.forEach(item => list.append(node('li', '', item)));
+    later.append(list); output.append(later);
+  }
+  if (plan.clarifying_question?.trim()) {
+    const card = node('section', 'plan-question');
+    const heading = node('h3', '', 'Make this plan fit you better');
+    const question = node('label', 'field');
+    const answer = node('textarea'); answer.id = 'clarification-answer'; answer.rows = 2; answer.maxLength = 600;
+    answer.placeholder = 'Type your answer here';
+    question.append(node('span', '', plan.clarifying_question), answer);
+    const action = node('button', 'outline-button', 'Refine plan'); action.type = 'button'; action.id = 'refine-plan';
+    const error = node('p', 'error'); error.id = 'refine-error'; error.hidden = true; error.setAttribute('role', 'alert');
+    card.append(heading, question, action, error); output.append(card);
+  }
   $('#empty').hidden = true; output.hidden = false; $('#error').hidden = true;
   updatePlanProgress();
 }
@@ -284,12 +303,37 @@ $('#output').addEventListener('change', event => {
   updatePlanProgress(); saveCurrentPlan();
 });
 
+$('#output').addEventListener('click', async event => {
+  if (event.target.id !== 'refine-plan' || !currentPlan) return;
+  const answer = $('#clarification-answer').value.trim();
+  const error = $('#refine-error');
+  if (!answer) { error.textContent = 'Answer the question before refining your plan.'; error.hidden = false; return; }
+  const previous = currentPlan;
+  const requestedDraft = draftFingerprint();
+  const button = event.target; button.disabled = true; button.textContent = 'Refining…'; error.hidden = true;
+  try {
+    const data = await requestPlan({ question: previous.clarifying_question, answer });
+    if (draftFingerprint() !== requestedDraft || currentPlan !== previous) throw new Error('Your plan changed while refining. Please try again.');
+    const firstChanged = data.first_step !== previous.first_step;
+    const timeChanged = data.total !== previous.total;
+    const changes = [];
+    if (firstChanged) changes.push(`First step: “${previous.first_step}” → “${data.first_step}”`);
+    if (previous.steps.length !== data.steps.length) changes.push(`Timed items: ${previous.steps.length} → ${data.steps.length}`);
+    if (timeChanged) changes.push(`Planned time: ${formatPlanMinutes(previous.total)} → ${formatPlanMinutes(data.total)}`);
+    const note = changes.length ? `Updated using your answer. ${changes.join(' · ')}` : 'Updated using your answer. The first step, item count, and total planned time stayed the same.';
+    renderPlan(data, [], note); saveCurrentPlan();
+  } catch (failure) {
+    error.textContent = failure instanceof TypeError ? 'Cannot reach the local planner server. Try again when it is running.' : failure.message;
+    error.hidden = false;
+  } finally { button.disabled = false; button.textContent = 'Refine plan'; }
+});
+
 function restorePlan() {
   try {
     const saved = JSON.parse(localStorage.getItem(planStorageKey));
     if (saved?.draft === draftFingerprint() && Array.isArray(saved.plan?.steps) &&
         saved.plan.steps.length && Number.isInteger(saved.plan.total) && Array.isArray(saved.completed)) {
-      renderPlan(saved.plan, saved.completed);
+      renderPlan(saved.plan, saved.completed, typeof saved.refinementNote === 'string' ? saved.refinementNote : '');
     }
   } catch (_) { /* A stale saved plan should not prevent the page from loading. */ }
 }
@@ -306,6 +350,15 @@ function workloadText() {
   }).join('\n\n') + `\n\nStudy block: ${state.date} at ${state.time}`;
 }
 
+async function requestPlan(clarification) {
+  const body = { tasks: workloadText(), minutes: state.minutes, energy: state.energy };
+  if (clarification) body.clarification = clarification;
+  const response = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'The plan could not be generated.');
+  return data;
+}
+
 $('#submit').addEventListener('click', async () => {
   const error = $('#error'); const button = $('#submit');
   const tasks = state.tasks.filter(task => task.title.trim());
@@ -318,9 +371,7 @@ $('#submit').addEventListener('click', async () => {
   const requestedDraft = draftFingerprint();
   button.disabled = true; button.firstChild.textContent = 'Generating… '; error.hidden = true;
   try {
-    const response = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tasks: workload, minutes: state.minutes, energy: state.energy }) });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'The plan could not be generated.');
+    const data = await requestPlan();
     if (draftFingerprint() !== requestedDraft) throw new Error('Your workload changed while the plan was generating. Please generate it again.');
     renderPlan(data); saveCurrentPlan();
   } catch (failure) {

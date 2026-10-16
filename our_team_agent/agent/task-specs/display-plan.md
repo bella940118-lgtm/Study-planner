@@ -25,7 +25,7 @@ Present the checked plan in a readable form so the student can begin studying. T
 ### Output 1
 
 - **Output name:** Actionable browser plan
-- **Contents and format:** Highlighted first action, timed checklist, total planned minutes, later work, and optional question.
+- **Contents and format:** Highlighted first action, timed checklist, total planned minutes, a list of later work, and an optional question with an answer field and Refine plan action.
 - **Next task or recipient:** Student begins studying and may check off displayed steps.
 - **Complete when:** The plan is visible in the browser after a successful response.
 
