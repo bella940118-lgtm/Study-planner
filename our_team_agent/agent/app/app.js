@@ -235,11 +235,17 @@ for (const [id, property] of [['start-time', 'time'], ['minutes', 'minutes'], ['
   });
 }
 
-function updatePlanProgress() {
+function updatePlanProgress(animateCompletion = false) {
   if (!currentPlan) return;
-  const done = completedSteps.filter(Boolean).length;
+  const work = currentPlan.steps.map((step, index) => step.kind === 'break' ? null : index).filter(index => index !== null);
+  const done = work.filter(index => completedSteps[index]).length;
   const minutes = currentPlan.steps.reduce((sum, step, index) => sum + (completedSteps[index] ? step.minutes : 0), 0);
-  $('#plan-progress').textContent = `${done} of ${currentPlan.steps.length} items complete · ${formatPlanMinutes(minutes)} done`;
+  $('#plan-progress').textContent = `${done} of ${work.length} study actions complete · ${formatPlanMinutes(minutes)} checked off`;
+  const bar = $('#plan-progress-bar'); bar.max = Math.max(1, work.length); bar.value = done;
+  const celebration = $('#plan-complete');
+  const finished = work.length > 0 && done === work.length;
+  celebration.hidden = !finished;
+  celebration.classList.toggle('is-celebrating', finished && animateCompletion);
 }
 
 function renderPlan(plan, completed = [], note = '') {
@@ -258,7 +264,8 @@ function renderPlan(plan, completed = [], note = '') {
     const metric = node('div', `plan-time-metric ${className}`); metric.append(node('span', '', label), node('strong', '', value)); summary.append(metric);
   }
   const progress = node('p', 'plan-progress'); progress.id = 'plan-progress';
-  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'), progress);
+  const progressBar = node('progress', 'plan-progress-bar'); progressBar.id = 'plan-progress-bar'; progressBar.max = 1; progressBar.value = 0; progressBar.setAttribute('aria-label', 'Study actions completed');
+  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'), progress, progressBar);
   const checklist = node('div', 'checklist');
   let elapsed = 0;
   const studyStart = new Date(`${state.date}T${state.time}:00`);
@@ -274,6 +281,11 @@ function renderPlan(plan, completed = [], note = '') {
     row.append(checkbox, body, timing); checklist.append(row);
   });
   output.append(checklist);
+  const celebration = node('div', 'plan-complete'); celebration.id = 'plan-complete'; celebration.hidden = true; celebration.setAttribute('role', 'status');
+  celebration.append(node('span', 'celebration-icon', '✦'), node('div', 'celebration-copy'));
+  celebration.querySelector('.celebration-icon').setAttribute('aria-hidden', 'true');
+  celebration.querySelector('.celebration-copy').append(node('strong', '', 'Study block complete!'), node('p', '', plan.later?.length ? 'You checked every study action in this plan. Your remaining work is listed below.' : 'You checked every study action in this plan. Nice work!'));
+  output.append(celebration);
   if (plan.later?.length) {
     const later = node('section', 'plan-later');
     later.append(node('h3', '', 'Save for another study session'));
@@ -297,10 +309,12 @@ function renderPlan(plan, completed = [], note = '') {
 }
 
 $('#output').addEventListener('change', event => {
+  if (!event.target.matches('[data-step-index]')) return;
   const index = Number(event.target.dataset.stepIndex);
   if (!currentPlan || !Number.isInteger(index) || index < 0 || index >= completedSteps.length) return;
+  const wasComplete = currentPlan.steps.every((step, stepIndex) => step.kind === 'break' || completedSteps[stepIndex]);
   completedSteps[index] = event.target.checked;
-  updatePlanProgress(); saveCurrentPlan();
+  updatePlanProgress(!wasComplete); saveCurrentPlan();
 });
 
 $('#output').addEventListener('click', async event => {
