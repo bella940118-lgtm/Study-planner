@@ -91,7 +91,16 @@ async function plan(input, key) {
         result.steps.some(step => typeof step.title !== 'string' || typeof step.why !== 'string' || typeof step.task !== 'string')) {
       throw new Error('Groq returned an incomplete plan. Please generate it again.');
     }
-    return { ...result, total, model };
+    const estimatedWork = [...input.tasks.matchAll(/Estimated full task:\s*(\d+)\s*minutes/g)]
+  .reduce((sum, match) => sum + Number(match[1]), 0);
+
+if (estimatedWork > input.minutes && result.later.length === 0) {
+  result.later.push(
+    `Continue the remaining work in another study session. Estimated workload: ${estimatedWork} minutes; current study block: ${input.minutes} minutes.`
+  );
+}
+
+return { ...result, total, model };
   } finally { clearTimeout(timeout); }
 }
 
