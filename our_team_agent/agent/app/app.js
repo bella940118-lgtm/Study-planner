@@ -259,20 +259,19 @@ function renderPlan(plan, completed = [], note = '') {
   const summary = node('div', 'plan-time-summary');
   for (const [label, value, className] of [
     ['Total planned', formatPlanMinutes(plan.total), 'planned-time'],
-    ['Study block', formatPlanMinutes(state.minutes), ''],
-    ['Unallocated', formatPlanMinutes(Math.max(0, state.minutes - plan.total)), '']
+    ['Study block', formatPlanMinutes(state.minutes), '']
   ]) {
     const metric = node('div', `plan-time-metric ${className}`); metric.append(node('span', '', label), node('strong', '', value)); summary.append(metric);
   }
   const studyStart = new Date(`${state.date}T${state.time}:00`);
   const clock = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  const end = new Date(studyStart.getTime() + Number(state.minutes) * 60000);
+  const end = new Date(studyStart.getTime() + plan.total * 60000);
   const chart = node('section', 'study-breakdown'); chart.setAttribute('aria-labelledby', 'breakdown-title');
   const chartHead = node('div', 'breakdown-head');
   const chartHeading = node('div'); const heading = node('h3', '', 'Study breakdown'); heading.id = 'breakdown-title';
   chartHeading.append(heading, node('p', '', `${dateFrom(state.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} · ${clock(studyStart)}–${clock(end)}`));
-  chartHead.append(chartHeading, node('strong', 'breakdown-total', `${formatPlanMinutes(state.minutes)} available`));
-  chart.append(chartHead, node('p', 'breakdown-hint', 'Each colored block is sized by time. Match its number to the schedule below.'));
+  chartHead.append(chartHeading, node('strong', 'breakdown-total', `${formatPlanMinutes(plan.total)} planned`));
+  chart.append(chartHead, node('p', 'breakdown-hint', 'Each colored block shows part of your planned study time. Match its number to the schedule below.'));
   const track = node('div', 'breakdown-track'); track.setAttribute('aria-hidden', 'true');
   const legend = node('div', 'breakdown-legend');
   let chartElapsed = 0;
@@ -289,14 +288,6 @@ function renderPlan(plan, completed = [], note = '') {
     legend.append(item);
     chartElapsed += step.minutes;
   });
-  const unallocated = Math.max(0, state.minutes - plan.total);
-  if (unallocated) {
-    const open = node('div', 'breakdown-segment tone-open', '+'); open.style.flexGrow = String(unallocated); track.append(open);
-    const item = node('div', 'breakdown-item tone-open');
-    item.append(node('span', 'breakdown-number', '+'), node('div', 'breakdown-item-details'));
-    item.querySelector('.breakdown-item-details').append(node('strong', '', 'Open time'), node('span', '', `${clock(new Date(studyStart.getTime() + plan.total * 60000))}–${clock(end)}`));
-    item.append(node('b', 'breakdown-duration', `${unallocated} min`)); legend.append(item);
-  }
   chart.append(track, legend);
   const progress = node('p', 'plan-progress'); progress.id = 'plan-progress';
   const progressBar = node('progress', 'plan-progress-bar'); progressBar.id = 'plan-progress-bar'; progressBar.max = 1; progressBar.value = 0; progressBar.setAttribute('aria-label', 'Study actions completed');

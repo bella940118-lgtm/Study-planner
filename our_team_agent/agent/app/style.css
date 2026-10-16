@@ -109,7 +109,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .empty-plan strong{font:600 18px 'Fraunces',Georgia,serif}.empty-plan p{color:#819286;font-size:12px;margin:5px 0 0}
 .error{background:#fff1eb;border:1px solid #f3dacd;color:#9b4b32;padding:12px 14px;border-radius:10px;font-size:12px;line-height:1.5}
 .plan-lead{padding:20px;background:#edf6ea;border-radius:13px;margin-top:20px}.plan-lead h3{font:600 22px 'Fraunces',Georgia,serif;margin:0 0 7px}.plan-lead p{font-size:12px;color:#5a765f;margin:0;line-height:1.5}
-.plan-time-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 20px}
+.plan-time-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 20px}
 .plan-time-metric{background:#f8faf6;border:1px solid #e2e9dd;border-radius:11px;padding:13px 15px}
 .plan-time-metric span{display:block;font-size:11px;color:#748878;font-weight:700;margin-bottom:4px}
 .plan-time-metric strong{font:600 20px 'Fraunces',Georgia,serif;color:#385946}
@@ -159,7 +159,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .tone-work-2{--tone:#d8d0f2;--tone-soft:#f6f3ff;--tone-border:#e6def6;--tone-text:#574b82}
 .tone-work-3{--tone:#f4d0cd;--tone-soft:#fff4f2;--tone-border:#f1dfdc;--tone-text:#7d494a}
 .tone-break{--tone:#ffe9bb;--tone-soft:#fff9ec;--tone-border:#f2e4c7;--tone-text:#785624}
-.tone-open{--tone:#e8e9ed;--tone-soft:#f7f8fa;--tone-border:#e4e5e9;--tone-text:#586070}
 .breakdown-segment,.breakdown-number,.breakdown-segment.tone-break,.breakdown-segment.tone-open,.tone-break .breakdown-number,.tone-open .breakdown-number{color:var(--tone-text)}
 .breakdown-segment.is-done{background-image:linear-gradient(#ffffff48,#ffffff48)}
 .plan-progress{color:#70629d}.plan-progress-bar{accent-color:#8172bb;background:#ebe6f5}.plan-progress-bar::-webkit-progress-bar{background:#ebe6f5}.plan-progress-bar::-webkit-progress-value{background:#8172bb}.plan-progress-bar::-moz-progress-bar{background:#8172bb}
@@ -170,9 +169,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 footer{display:flex;justify-content:space-between;color:#92a393;font-size:11px;padding:28px 0 34px}
 [hidden]{display:none!important}
 @media(max-width:1000px){.intro{display:block}.overview{margin-top:24px;max-width:410px}.workspace{grid-template-columns:1fr}.calendar-panel{max-width:none}}
-@media(max-width:760px){.plan-time-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-time-metric.planned-time{grid-column:1/-1}.breakdown-legend{grid-template-columns:1fr}.breakdown-head{align-items:flex-start;flex-direction:column;gap:10px}}
+@media(max-width:760px){.breakdown-legend{grid-template-columns:1fr}.breakdown-head{align-items:flex-start;flex-direction:column;gap:10px}}
 @media(max-width:640px){.shell{padding:0 17px}.topbar{height:70px}.top-note{display:none}.intro{padding:38px 0 29px}.intro h1{font-size:40px}.overview{min-width:0}.panel{padding:19px;border-radius:16px}.panel-heading{align-items:start}.tasks-panel .panel-heading{flex-wrap:wrap}.plan-panel .panel-heading{display:block}.plan-panel .primary-button{margin-top:16px;width:100%;display:flex;justify-content:space-between}.field-grid{grid-template-columns:1fr 1fr}.calendar-day{height:37px}.plan-note{align-items:start}footer{display:block}footer span{display:block;margin:4px 0}}
-@media(max-width:640px){.plan-time-summary{grid-template-columns:1fr 1fr}.plan-time-metric.planned-time{grid-column:1/-1}.priority-options{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.plan-time-summary{grid-template-columns:1fr}.priority-options{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.willingness-options{grid-template-columns:1fr}.willingness-option{text-align:left}}
 @media(max-width:640px){.plan-panel{padding:20px}.plan-lead{padding:20px}.plan-lead h3{font-size:24px}.study-breakdown{padding:18px}.breakdown-head{align-items:flex-start;flex-direction:column;gap:10px}.breakdown-head h3{font-size:23px}.breakdown-track{height:49px}.breakdown-segment{font-size:14px}.breakdown-legend{grid-template-columns:1fr}.breakdown-item{padding:11px 12px}.plan-step{gap:10px;padding:17px 2px}.step-body strong{font-size:15px}.step-body small{font-size:13px}.step-timing{min-width:98px}.step-time{font-size:17px}.step-window{font-size:11px}.plan-later,.plan-question{padding:18px}.plan-later h3,.plan-question h3{font-size:20px}}
 @media(max-width:390px){.field-grid{grid-template-columns:1fr}.overview{padding:14px 0}.overview strong{font-size:21px}}
