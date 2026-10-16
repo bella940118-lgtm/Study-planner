@@ -19,6 +19,6 @@
 
 NextStep now uses the Groq Chat Completions API with the `openai/gpt-oss-20b` model.
 
-The server has been updated to use Groq, but a complete live demonstration still needs to be tested locally with a valid `GROQ_API_KEY`.
+The server has been updated to use Groq, but the live AI workflow still needs to be tested locally with a valid `GROQ_API_KEY`.
 
-Before class, verify that the app generates a real AI study plan, respects the available time, and displays actionable steps.
+Before class, verify that the app generates a real study plan, respects the available time, and displays actionable steps.
