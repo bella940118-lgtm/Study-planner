@@ -1,5 +1,6 @@
 const $ = selector => document.querySelector(selector);
 const storageKey = 'nextstep-study-draft-v2';
+const planStorageKey = 'nextstep-saved-plan-v1';
 const today = localDate(new Date());
 const initial = { tasks: [], date: today, time: '16:00', minutes: 60, energy: 'medium' };
 const priorities = [
@@ -7,6 +8,11 @@ const priorities = [
   { id: 'urgent-less-important', label: 'High urgency · Low importance', badge: 'Time-sensitive' },
   { id: 'less-urgent-important', label: 'Low urgency · High importance', badge: 'Important' },
   { id: 'less-urgent-less-important', label: 'Low urgency · Low importance', badge: 'Flexible' }
+];
+const willingnessOptions = [
+  { id: 'ready', label: 'Ready to start' },
+  { id: 'unsure', label: 'Not sure' },
+  { id: 'unwilling', label: 'Not willing yet' }
 ];
 
 function localDate(date) {
@@ -28,7 +34,8 @@ function readDraft() {
       tasks: saved.tasks.filter(task => task && typeof task === 'object').map(task => ({
         id: String(task.id || makeId()), title: String(task.title || ''), detail: String(task.detail || ''),
         estimate: Number(task.estimate) || 60, due: String(task.due || ''), breakdown: String(task.breakdown || ''),
-        priority: priorities.some(option => option.id === task.priority) ? task.priority : ''
+        priority: priorities.some(option => option.id === task.priority) ? task.priority : '',
+        willingness: willingnessOptions.some(option => option.id === task.willingness) ? task.willingness : ''
       })),
       date: /^\d{4}-\d{2}-\d{2}$/.test(saved.date) ? saved.date : today,
       time: /^\d{2}:\d{2}$/.test(saved.time) ? saved.time : '16:00',
@@ -42,9 +49,19 @@ function readDraft() {
 function makeId() { return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`; }
 const state = readDraft();
 let visibleMonth = new Date(dateFrom(state.date).getFullYear(), dateFrom(state.date).getMonth(), 1);
+let currentPlan = null;
+let completedSteps = [];
 
 function save() {
   try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) { /* Editing still works without storage. */ }
+}
+
+function draftFingerprint() { return JSON.stringify(state); }
+
+function saveCurrentPlan() {
+  if (!currentPlan) return;
+  try { localStorage.setItem(planStorageKey, JSON.stringify({ draft: draftFingerprint(), plan: currentPlan, completed: completedSteps })); }
+  catch (_) { /* The plan remains usable in this tab when storage is blocked. */ }
 }
 
 function node(tag, className, content) {
@@ -87,7 +104,17 @@ function taskCard(task, index) {
     options.append(button);
   });
   priority.append(options);
-  card.append(head, title, detail, row, priority, field('Work breakdown · one step per line', breakdown));
+  const willingness = node('div', 'willingness-picker'); willingness.setAttribute('role', 'group'); willingness.setAttribute('aria-label', `Task ${index + 1} willingness to start`);
+  willingness.append(node('strong', 'willingness-title', 'How willing are you to start this task?'));
+  const willingnessChoices = node('div', 'willingness-options');
+  willingnessOptions.forEach(option => {
+    const button = node('button', 'willingness-option', option.label);
+    button.type = 'button'; button.dataset.willingness = option.id;
+    button.setAttribute('aria-pressed', String(task.willingness === option.id));
+    willingnessChoices.append(button);
+  });
+  willingness.append(willingnessChoices, node('small', 'willingness-hint', 'The planner can make a hesitant task easier to begin.'));
+  card.append(head, title, detail, row, priority, willingness, field('Work breakdown · one step per line', breakdown));
   return card;
 }
 
@@ -141,6 +168,8 @@ function renderCalendar() {
 }
 
 function invalidatePlan() {
+  currentPlan = null; completedSteps = [];
+  try { localStorage.removeItem(planStorageKey); } catch (_) { /* Draft editing still works without storage. */ }
   if (!$('#output').hidden) {
     $('#output').hidden = true; $('#output').replaceChildren(); $('#empty').hidden = false;
     $('#empty strong').textContent = 'Your draft changed.';
@@ -156,12 +185,21 @@ function setDate(value) {
 }
 
 $('#add-task').addEventListener('click', () => {
-  state.tasks.push({ id: makeId(), title: '', detail: '', estimate: 60, due: '', breakdown: '', priority: '' });
+  state.tasks.push({ id: makeId(), title: '', detail: '', estimate: 60, due: '', breakdown: '', priority: '', willingness: '' });
   save(); renderTasks(); invalidatePlan();
   $('#task-list .task-card:last-child .task-title').focus();
 });
 
 $('#task-list').addEventListener('click', event => {
+  const willingnessButton = event.target.closest('[data-willingness]');
+  if (willingnessButton) {
+    const card = willingnessButton.closest('.task-card');
+    const task = state.tasks.find(item => item.id === card.dataset.id);
+    if (!task) return;
+    task.willingness = willingnessButton.dataset.willingness;
+    card.querySelectorAll('[data-willingness]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.willingness === task.willingness)));
+    save(); invalidatePlan(); return;
+  }
   const priorityButton = event.target.closest('[data-priority]');
   if (priorityButton) {
     const card = priorityButton.closest('.task-card');
@@ -196,7 +234,16 @@ for (const [id, property] of [['start-time', 'time'], ['minutes', 'minutes'], ['
   });
 }
 
-function renderPlan(plan) {
+function updatePlanProgress() {
+  if (!currentPlan) return;
+  const done = completedSteps.filter(Boolean).length;
+  const minutes = currentPlan.steps.reduce((sum, step, index) => sum + (completedSteps[index] ? step.minutes : 0), 0);
+  $('#plan-progress').textContent = `${done} of ${currentPlan.steps.length} items complete · ${formatPlanMinutes(minutes)} done`;
+}
+
+function renderPlan(plan, completed = []) {
+  currentPlan = plan;
+  completedSteps = plan.steps.map((_, index) => Boolean(completed[index]));
   const output = $('#output'); output.replaceChildren();
   const lead = node('div', 'plan-lead'); lead.append(node('span', 'section-kicker', 'START HERE'), node('h3', '', plan.first_step), node('p', '', plan.headline)); output.append(lead);
   const summary = node('div', 'plan-time-summary');
@@ -207,14 +254,17 @@ function renderPlan(plan) {
   ]) {
     const metric = node('div', `plan-time-metric ${className}`); metric.append(node('span', '', label), node('strong', '', value)); summary.append(metric);
   }
-  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'));
+  const progress = node('p', 'plan-progress'); progress.id = 'plan-progress';
+  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'), progress);
   const checklist = node('div', 'checklist');
   let elapsed = 0;
   const studyStart = new Date(`${state.date}T${state.time}:00`);
   const clock = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   plan.steps.forEach((step, index) => {
-    const row = node('label', 'plan-step'); const checkbox = node('input'); checkbox.type = 'checkbox'; checkbox.setAttribute('aria-label', `Complete step ${index + 1}`);
+    const isBreak = step.kind === 'break';
+    const row = node('label', `plan-step${isBreak ? ' break-step' : ''}`); const checkbox = node('input'); checkbox.type = 'checkbox'; checkbox.dataset.stepIndex = String(index); checkbox.checked = completedSteps[index]; checkbox.setAttribute('aria-label', `Complete ${isBreak ? 'break' : 'step'} ${index + 1}`);
     const body = node('span', 'step-body'); body.append(node('strong', '', `${index + 1}. ${step.title}`), node('small', '', `${step.task} · ${step.why}`));
+    if (isBreak) body.prepend(node('span', 'break-label', 'SHORT BREAK'));
     const timing = node('span', 'step-timing');
     timing.append(node('strong', 'step-time', `${step.minutes} min`), node('small', 'step-window', `${clock(new Date(studyStart.getTime() + elapsed * 60000))}–${clock(new Date(studyStart.getTime() + (elapsed + step.minutes) * 60000))}`));
     elapsed += step.minutes;
@@ -224,12 +274,31 @@ function renderPlan(plan) {
   if (plan.later?.length) output.append(node('p', 'plan-after', `Later: ${plan.later.join(' · ')}`));
   if (plan.clarifying_question) output.append(node('p', 'plan-after', `Check: ${plan.clarifying_question}`));
   $('#empty').hidden = true; output.hidden = false; $('#error').hidden = true;
+  updatePlanProgress();
+}
+
+$('#output').addEventListener('change', event => {
+  const index = Number(event.target.dataset.stepIndex);
+  if (!currentPlan || !Number.isInteger(index) || index < 0 || index >= completedSteps.length) return;
+  completedSteps[index] = event.target.checked;
+  updatePlanProgress(); saveCurrentPlan();
+});
+
+function restorePlan() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(planStorageKey));
+    if (saved?.draft === draftFingerprint() && Array.isArray(saved.plan?.steps) &&
+        saved.plan.steps.length && Number.isInteger(saved.plan.total) && Array.isArray(saved.completed)) {
+      renderPlan(saved.plan, saved.completed);
+    }
+  } catch (_) { /* A stale saved plan should not prevent the page from loading. */ }
 }
 
 function workloadText() {
   return state.tasks.filter(task => task.title.trim()).map((task, index) => {
     const parts = [`Task ${index + 1}: ${task.title.trim()}`, `Estimated full task: ${task.estimate} minutes`];
     if (task.priority) parts.push(`Student-selected priority: ${priorities.find(option => option.id === task.priority).label}`);
+    if (task.willingness) parts.push(`Willingness to start: ${willingnessOptions.find(option => option.id === task.willingness).label}`);
     if (task.due) parts.push(`Due: ${task.due}`);
     if (task.detail.trim()) parts.push(`Details: ${task.detail.trim()}`);
     if (stepsFor(task).length) parts.push(`Known work breakdown: ${stepsFor(task).join('; ')}`);
@@ -246,12 +315,14 @@ $('#submit').addEventListener('click', async () => {
   }
   const workload = workloadText();
   if (workload.length > 6000) { error.textContent = 'Your workload is too long. Shorten some task details or breakdown steps.'; error.hidden = false; return; }
+  const requestedDraft = draftFingerprint();
   button.disabled = true; button.firstChild.textContent = 'Generating… '; error.hidden = true;
   try {
     const response = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tasks: workload, minutes: state.minutes, energy: state.energy }) });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'The plan could not be generated.');
-    renderPlan(data);
+    if (draftFingerprint() !== requestedDraft) throw new Error('Your workload changed while the plan was generating. Please generate it again.');
+    renderPlan(data); saveCurrentPlan();
   } catch (failure) {
     error.textContent = failure instanceof TypeError ? 'Cannot reach the local planner server. Check that it is running, then try again.' : failure.message;
     error.hidden = false;
@@ -261,3 +332,4 @@ $('#submit').addEventListener('click', async () => {
 $('#study-date').value = state.date; $('#start-time').value = state.time;
 $('#minutes').value = String(state.minutes); $('#energy').value = state.energy;
 renderTasks();
+restorePlan();

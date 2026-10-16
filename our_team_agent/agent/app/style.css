@@ -58,6 +58,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .priority-option{min-height:39px;text-align:left;border:1px solid var(--priority-border);background:var(--priority-bg);color:var(--priority-color);border-radius:9px;padding:8px 10px;font-size:10px;font-weight:700;line-height:1.3}
 .priority-option:hover{filter:brightness(.97)}
 .priority-option[aria-pressed="true"]{border-width:2px;box-shadow:0 0 0 2px var(--priority-border);padding:7px 9px}
+.willingness-picker{margin-top:14px;padding:13px;background:#f6f8f5;border:1px solid #e0e9dd;border-radius:11px}
+.willingness-title{display:block;color:#3b6148;font-size:12px;margin-bottom:9px}
+.willingness-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.willingness-option{border:1px solid #d8e3d7;border-radius:8px;background:#fff;color:#55715c;padding:9px 7px;font-size:11px;font-weight:700}
+.willingness-option:hover{background:#edf4eb}
+.willingness-option[aria-pressed="true"]{border-color:#498766;background:#e3f1e5;color:#276243;box-shadow:inset 0 0 0 1px #498766}
+.willingness-option[data-willingness="unwilling"][aria-pressed="true"]{border-color:#d19a6d;background:#fff0df;color:#89531f;box-shadow:inset 0 0 0 1px #d19a6d}
+.willingness-hint{display:block;color:#7a8d7f;font-size:10px;line-height:1.4;margin-top:8px}
 .panel-footnote{color:#8a9d8c;font-size:11px;line-height:1.5;margin:17px 0 0}
 .task-empty{min-height:240px;border:1px dashed #cfddce;border-radius:14px;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:25px;color:#7e9582;background:#fafcf8}
 .task-empty span{display:grid;place-items:center;font-size:24px;width:48px;height:48px;border-radius:13px;background:#eaf4e9;color:#4b8960;margin-bottom:13px}
@@ -108,11 +116,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .plan-time-metric.planned-time{background:#e5f2e5;border-color:#b9d8bd}
 .plan-time-metric.planned-time strong{font-size:27px;color:#256447}
 .checklist-title{font:600 20px 'Fraunces',Georgia,serif;margin:0 0 5px}
+.plan-progress{color:#587862;font-size:12px;font-weight:700;margin:0 0 8px}
 .checklist{margin-top:5px}.plan-step{display:flex;align-items:start;gap:12px;border-bottom:1px solid #e9efe7;padding:15px 2px;cursor:pointer}.plan-step input{width:18px;height:18px;accent-color:#347b58;margin:4px 0 0;flex:none}.step-body{flex:1;min-width:0}.step-body strong{display:block;font-size:14px;line-height:1.4}.step-body small{display:block;color:#5f7465;font-size:12px;line-height:1.5;margin-top:4px}.step-timing{min-width:115px;text-align:right}.step-time{display:block;color:#2d6a48;font-size:16px;white-space:nowrap}.step-window{display:block;color:#738d79;font-size:11px;margin-top:3px;white-space:nowrap}.plan-step:has(input:checked) .step-body{text-decoration:line-through;color:#9ba99d}.plan-after{font-size:12px;color:#708473;line-height:1.5}
+.break-step{background:#f0f5fa;border:1px solid #dce8f2;border-radius:10px;padding:12px;margin:6px 0}
+.break-step input{accent-color:#4c7ca2}
+.break-step .step-time{color:#386c95}
+.break-label{display:block;color:#386c95;font-size:10px;font-weight:700;letter-spacing:.1em;margin-bottom:4px}
 footer{display:flex;justify-content:space-between;color:#92a393;font-size:11px;padding:28px 0 34px}
 [hidden]{display:none!important}
 @media(max-width:1000px){.intro{display:block}.overview{margin-top:24px;max-width:410px}.workspace{grid-template-columns:1fr}.calendar-panel{max-width:none}}
 @media(max-width:640px){.shell{padding:0 17px}.topbar{height:70px}.top-note{display:none}.intro{padding:38px 0 29px}.intro h1{font-size:40px}.overview{min-width:0}.panel{padding:19px;border-radius:16px}.panel-heading{align-items:start}.tasks-panel .panel-heading{flex-wrap:wrap}.plan-panel .panel-heading{display:block}.plan-panel .primary-button{margin-top:16px;width:100%;display:flex;justify-content:space-between}.field-grid{grid-template-columns:1fr 1fr}.calendar-day{height:37px}.plan-note{align-items:start}footer{display:block}footer span{display:block;margin:4px 0}}
 @media(max-width:640px){.plan-time-summary{grid-template-columns:1fr 1fr}.plan-time-metric.planned-time{grid-column:1/-1}.priority-options{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.willingness-options{grid-template-columns:1fr}.willingness-option{text-align:left}}
 @media(max-width:390px){.field-grid{grid-template-columns:1fr}.overview{padding:14px 0}.overview strong{font-size:21px}}
 @media(max-width:390px){.priority-options{grid-template-columns:1fr}.step-timing{min-width:95px}.step-time{font-size:14px}.step-window{font-size:10px}}
