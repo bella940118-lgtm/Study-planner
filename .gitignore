@@ -1,2 +1,6 @@
 api_keys/*
 node_modules/
+.env
+.env.*
+.venv/
+__pycache__/
