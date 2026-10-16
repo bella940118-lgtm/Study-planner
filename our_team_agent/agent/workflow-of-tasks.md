@@ -46,3 +46,12 @@ flowchart TD
 ```
 
 See the [task summary](task-summary.md) for each task's specification. The model is responsible for generating the study actions in T3; the other app tasks validate, route, and display the result.
+
+## 6. Model, Tools, and Automation Levels
+
+- **T1, T2, T4, and T5 (Level 1):** JavaScript and Node.js handle input validation, API key checks, output verification, and displaying the plan using predefined rules.
+- **T3 (Level 2):** Groq's API provides access to the `openai/gpt-oss-20b` language model, which converts student workloads into prioritized, timed study steps.
+- **T6 (Level 0):** The student or project operator manually resolves errors and resubmits.
+- **Level 3 decision:** No Level 3 task is necessary because the workflow follows a predefined sequence. The AI generates recommendations but does not independently choose tools or change the workflow.
+- **External tools:** The local browser provides the interface, Node.js runs the server, and the Groq API generates the study plan. No additional integrations are required.
+- **Skill decision:** A reusable Skill is unnecessary because this is one focused workflow, and the planning instructions and expected JSON output are already defined in the application.
