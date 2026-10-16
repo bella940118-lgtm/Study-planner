@@ -2,6 +2,12 @@ const $ = selector => document.querySelector(selector);
 const storageKey = 'nextstep-study-draft-v2';
 const today = localDate(new Date());
 const initial = { tasks: [], date: today, time: '16:00', minutes: 60, energy: 'medium' };
+const priorities = [
+  { id: 'urgent-important', label: 'High urgency · High importance', badge: 'Urgent' },
+  { id: 'urgent-less-important', label: 'High urgency · Low importance', badge: 'Time-sensitive' },
+  { id: 'less-urgent-important', label: 'Low urgency · High importance', badge: 'Important' },
+  { id: 'less-urgent-less-important', label: 'Low urgency · Low importance', badge: 'Flexible' }
+];
 
 function localDate(date) {
   const year = date.getFullYear();
@@ -21,7 +27,8 @@ function readDraft() {
     if (saved && Array.isArray(saved.tasks)) return {
       tasks: saved.tasks.filter(task => task && typeof task === 'object').map(task => ({
         id: String(task.id || makeId()), title: String(task.title || ''), detail: String(task.detail || ''),
-        estimate: Number(task.estimate) || 60, due: String(task.due || ''), breakdown: String(task.breakdown || '')
+        estimate: Number(task.estimate) || 60, due: String(task.due || ''), breakdown: String(task.breakdown || ''),
+        priority: priorities.some(option => option.id === task.priority) ? task.priority : ''
       })),
       date: /^\d{4}-\d{2}-\d{2}$/.test(saved.date) ? saved.date : today,
       time: /^\d{2}:\d{2}$/.test(saved.time) ? saved.time : '16:00',
@@ -55,10 +62,13 @@ function field(labelText, fieldNode) {
 
 function taskCard(task, index) {
   const card = node('article', 'task-card'); card.dataset.id = task.id;
+  if (task.priority) card.classList.add(`priority-${task.priority}`);
   const head = node('div', 'task-card-head');
   const number = node('span', 'task-number', `TASK ${String(index + 1).padStart(2, '0')}`);
+  const badge = node('span', 'priority-badge', priorities.find(option => option.id === task.priority)?.badge || 'Choose priority');
   const remove = node('button', 'remove-task', 'Remove'); remove.type = 'button'; remove.dataset.action = 'remove'; remove.setAttribute('aria-label', `Remove task ${index + 1}`);
-  head.append(number, remove);
+  const headLabels = node('div', 'task-head-labels'); headLabels.append(number, badge);
+  head.append(headLabels, remove);
 
   const title = node('input'); title.type = 'text'; title.placeholder = 'e.g. Biology chapter review'; title.maxLength = 160; title.value = task.title; title.dataset.field = 'title'; title.setAttribute('aria-label', `Task ${index + 1} title`);
   title.className = 'task-title';
@@ -67,7 +77,17 @@ function taskCard(task, index) {
   const due = node('input'); due.type = 'date'; due.value = task.due; due.dataset.field = 'due'; due.setAttribute('aria-label', `Task ${index + 1} due date`);
   const breakdown = node('textarea'); breakdown.placeholder = 'One action per line\ne.g. Skim the chapter headings\nMake 10 flashcards\nTry practice questions'; breakdown.rows = 4; breakdown.maxLength = 1400; breakdown.value = task.breakdown; breakdown.dataset.field = 'breakdown'; breakdown.setAttribute('aria-label', `Task ${index + 1} breakdown, one action per line`);
   const row = node('div', 'field-grid'); row.append(field('Estimated time (min)', estimate), field('Due date (optional)', due));
-  card.append(head, title, detail, row, field('Work breakdown · one step per line', breakdown));
+  const priority = node('div', 'priority-picker'); priority.setAttribute('role', 'group'); priority.setAttribute('aria-label', `Task ${index + 1} urgency and importance`);
+  priority.append(node('strong', 'priority-title', 'Urgency × importance'));
+  const options = node('div', 'priority-options');
+  priorities.forEach(option => {
+    const button = node('button', `priority-option priority-${option.id}`, option.label);
+    button.type = 'button'; button.dataset.priority = option.id;
+    button.setAttribute('aria-pressed', String(task.priority === option.id));
+    options.append(button);
+  });
+  priority.append(options);
+  card.append(head, title, detail, row, priority, field('Work breakdown · one step per line', breakdown));
   return card;
 }
 
@@ -82,6 +102,7 @@ function renderTasks() {
 
 function stepsFor(task) { return task.breakdown.split(/\r?\n/).map(line => line.trim()).filter(Boolean); }
 function formatMinutes(minutes) { const hours = Math.floor(minutes / 60); const rest = minutes % 60; return hours ? `${hours}h${rest ? ` ${rest}m` : ''}` : `${rest}m`; }
+function formatPlanMinutes(minutes) { const hours = Math.floor(minutes / 60); const rest = minutes % 60; return hours ? `${hours} hr${rest ? ` ${rest} min` : ''}` : `${rest} min`; }
 
 function renderOverview() {
   const titled = state.tasks.filter(task => task.title.trim());
@@ -135,12 +156,23 @@ function setDate(value) {
 }
 
 $('#add-task').addEventListener('click', () => {
-  state.tasks.push({ id: makeId(), title: '', detail: '', estimate: 60, due: '', breakdown: '' });
+  state.tasks.push({ id: makeId(), title: '', detail: '', estimate: 60, due: '', breakdown: '', priority: '' });
   save(); renderTasks(); invalidatePlan();
   $('#task-list .task-card:last-child .task-title').focus();
 });
 
 $('#task-list').addEventListener('click', event => {
+  const priorityButton = event.target.closest('[data-priority]');
+  if (priorityButton) {
+    const card = priorityButton.closest('.task-card');
+    const task = state.tasks.find(item => item.id === card.dataset.id);
+    if (!task) return;
+    task.priority = priorityButton.dataset.priority;
+    card.className = `task-card priority-${task.priority}`;
+    card.querySelector('.priority-badge').textContent = priorities.find(option => option.id === task.priority).badge;
+    card.querySelectorAll('[data-priority]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.priority === task.priority)));
+    save(); invalidatePlan(); return;
+  }
   const button = event.target.closest('[data-action="remove"]'); if (!button) return;
   state.tasks = state.tasks.filter(task => task.id !== button.closest('.task-card').dataset.id);
   save(); renderTasks(); invalidatePlan();
@@ -166,12 +198,27 @@ for (const [id, property] of [['start-time', 'time'], ['minutes', 'minutes'], ['
 
 function renderPlan(plan) {
   const output = $('#output'); output.replaceChildren();
-  const lead = node('div', 'plan-lead'); lead.append(node('span', 'section-kicker', `${formatMinutes(plan.total)} PLANNED`), node('h3', '', plan.first_step), node('p', '', plan.headline)); output.append(lead);
+  const lead = node('div', 'plan-lead'); lead.append(node('span', 'section-kicker', 'START HERE'), node('h3', '', plan.first_step), node('p', '', plan.headline)); output.append(lead);
+  const summary = node('div', 'plan-time-summary');
+  for (const [label, value, className] of [
+    ['Total planned', formatPlanMinutes(plan.total), 'planned-time'],
+    ['Study block', formatPlanMinutes(state.minutes), ''],
+    ['Unallocated', formatPlanMinutes(Math.max(0, state.minutes - plan.total)), '']
+  ]) {
+    const metric = node('div', `plan-time-metric ${className}`); metric.append(node('span', '', label), node('strong', '', value)); summary.append(metric);
+  }
+  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'));
   const checklist = node('div', 'checklist');
+  let elapsed = 0;
+  const studyStart = new Date(`${state.date}T${state.time}:00`);
+  const clock = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   plan.steps.forEach((step, index) => {
     const row = node('label', 'plan-step'); const checkbox = node('input'); checkbox.type = 'checkbox'; checkbox.setAttribute('aria-label', `Complete step ${index + 1}`);
     const body = node('span', 'step-body'); body.append(node('strong', '', `${index + 1}. ${step.title}`), node('small', '', `${step.task} · ${step.why}`));
-    row.append(checkbox, body, node('span', 'step-time', `${step.minutes} min`)); checklist.append(row);
+    const timing = node('span', 'step-timing');
+    timing.append(node('strong', 'step-time', `${step.minutes} min`), node('small', 'step-window', `${clock(new Date(studyStart.getTime() + elapsed * 60000))}–${clock(new Date(studyStart.getTime() + (elapsed + step.minutes) * 60000))}`));
+    elapsed += step.minutes;
+    row.append(checkbox, body, timing); checklist.append(row);
   });
   output.append(checklist);
   if (plan.later?.length) output.append(node('p', 'plan-after', `Later: ${plan.later.join(' · ')}`));
@@ -182,6 +229,7 @@ function renderPlan(plan) {
 function workloadText() {
   return state.tasks.filter(task => task.title.trim()).map((task, index) => {
     const parts = [`Task ${index + 1}: ${task.title.trim()}`, `Estimated full task: ${task.estimate} minutes`];
+    if (task.priority) parts.push(`Student-selected priority: ${priorities.find(option => option.id === task.priority).label}`);
     if (task.due) parts.push(`Due: ${task.due}`);
     if (task.detail.trim()) parts.push(`Details: ${task.detail.trim()}`);
     if (stepsFor(task).length) parts.push(`Known work breakdown: ${stepsFor(task).join('; ')}`);

@@ -29,19 +29,15 @@ Students with competing study priorities can begin work sooner and see a realist
 
 The repository follows the team template: `our_team_agent/` contains `agent/`, `docs/`, and `.gitkeep`; the root contains this README and an MIT `LICENSE`. The running app lives in `our_team_agent/agent/app/`. The root `.gitignore` excludes the local API key.
 
-
 ## Run Locally
 
-1. Install Node.js 18 or newer. Set the `GROQ_API_KEY` environment variable, or put a valid Groq API key in `api_keys/groq.txt` as a bare key or `GROQ_API_KEY="..."` line. The `api_keys` folder must be excluded by `.gitignore`. Never commit API keys to GitHub.
-2. Run `node our_team_agent/agent/app/server.js` from the repository root.
-3. Open `http://127.0.0.1:3000`. Add each big study task, its estimated minutes, optional due date, and known work breakdown (one step per line).
+1. Install Node.js 18 or newer. Put a valid Claude API key in `api_keys/claude.txt.txt` as a bare key or `ANTHROPIC_API_KEY="..."` line, or set the `ANTHROPIC_API_KEY` environment variable. The `api_keys` folder is excluded by `.gitignore`; never commit API keys.
+2. Run `node our_team_agent/agent/app/server.js` in this repository folder.
+3. Open `http://127.0.0.1:3000`. Add each big study task, its estimated minutes, optional due date, urgency and importance category, and known work breakdown (one step per line). Tasks are color coded by category, with high urgency and high importance marked **Urgent**.
 4. Choose a study day in the calendar, start time, available minutes, and energy level. The task draft and study block are saved in this browser.
-5. Select **Generate with AI** and review the proposed timed steps.
+5. Select **Generate with AI** and review the timed checklist, total planned time, study block length, and unallocated time.
 
-The running app uses `openai/gpt-oss-20b` through the Groq Chat Completions API to create the plan. The Node.js server validates inputs and output and keeps the key out of the browser. A live AI plan requires internet access and available Groq API quota. The calendar and task draft can be edited without API access; no generated plan is saved or silently substituted when an API call fails. The app does not automatically retry failed requests.
-
-The model can optionally be changed using the `GROQ_MODEL` environment variable. The separate Python StudyFlow `.env` file is not automatically loaded by this Node.js application.
-   
+The running app uses `claude-haiku-5-5` through the Claude Messages API to create the plan. Set `ANTHROPIC_MODEL` to choose another Claude model. The Node.js server validates inputs and output and keeps the key out of the browser. A live AI plan requires internet and available API credits. The calendar and task draft can be edited without API access; no generated plan is saved or silently substituted when an API call fails. The app does not automatically retry failed requests.
 
 ## Skill Decision
 
