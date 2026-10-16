@@ -1,6 +1,6 @@
 # Three-Minute Local Showcase
 
-## Before the Showcase
+## Before the Showcase 
 
 - Confirm the local API key is present and the account has available API credits. The key must stay out of GitHub and screen sharing.
 - Start the server with `node our_team_agent/agent/app/server.js` from the repository root and open `http://127.0.0.1:3000`.
