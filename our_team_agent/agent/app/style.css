@@ -129,6 +129,33 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .study-breakdown{margin:0 0 30px;padding:25px;border:1px solid #d7e4d8;border-radius:17px;background:#f8fbf8}.breakdown-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.breakdown-head h3{font:600 26px 'Fraunces',Georgia,serif;margin:0 0 5px}.breakdown-head p{font-size:15px;color:#57705e;margin:0}.breakdown-total{flex:none;border-radius:999px;padding:9px 13px;background:#e1efe2;color:#285f43;font-size:14px}.breakdown-hint{font-size:13px;color:#6b806f;line-height:1.5;margin:16px 0 13px}.breakdown-track{display:flex;gap:4px;width:100%;height:58px;padding:4px;background:#e3ebe4;border-radius:13px;overflow:hidden}.breakdown-segment{flex-basis:0;min-width:0;display:grid;place-items:center;border-radius:9px;background:var(--tone);color:#fff;font-size:18px;font-weight:700}.breakdown-segment.tone-break,.breakdown-segment.tone-open{color:#385775}.breakdown-segment.is-done{background-image:linear-gradient(#ffffff30,#ffffff30)}.breakdown-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}.breakdown-item{display:flex;align-items:center;gap:12px;min-width:0;padding:13px 15px;border:1px solid #e1e9e2;border-radius:11px;background:#fff}.breakdown-number{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--tone);color:#fff;font-weight:700}.tone-break .breakdown-number,.tone-open .breakdown-number{color:#385775}.breakdown-item-details{flex:1;min-width:0}.breakdown-item-details strong{display:block;font-size:15px;line-height:1.3;overflow-wrap:anywhere}.breakdown-item-details span{display:block;font-size:13px;color:#61766a;margin-top:4px}.breakdown-duration{flex:none;font-size:15px;color:#304d3d}.breakdown-item.is-done .breakdown-item-details strong{text-decoration:line-through;color:#697f70}.tone-work-0{--tone:#317352}.tone-work-1{--tone:#4b709e}.tone-work-2{--tone:#9b6739}.tone-work-3{--tone:#796399}.tone-break{--tone:#dceafa}.tone-open{--tone:#e4e9e5}
 .checklist-title{font-size:25px;margin-bottom:7px}.plan-progress{font-size:14px;margin-bottom:10px}.plan-progress-bar{height:12px;margin-bottom:10px}.plan-step{gap:17px;padding:19px 8px}.plan-step input{width:22px;height:22px;margin-top:3px}.step-body strong{font-size:17px}.step-body small{font-size:14px;margin-top:7px}.step-timing{min-width:140px}.step-time{font-size:21px}.step-window{font-size:13px}.break-step{padding:17px}.break-label{font-size:12px}.plan-later,.plan-question{padding:22px 24px}.plan-later h3,.plan-question h3{font-size:23px}.plan-later ul{font-size:15px}.plan-question .field{font-size:15px}.plan-question textarea{font-size:15px;padding:12px}.plan-question .outline-button{font-size:15px}.plan-complete{padding:20px 24px}.celebration-copy strong{font-size:23px}.celebration-copy p{font-size:14px}
 .step-body .step-action{display:block;color:#365845;font-size:15px;line-height:1.55;margin-top:6px}.step-body .step-reason{display:block;color:#6c8070;font-size:13px;line-height:1.5;margin-top:4px}
+/* A softer academic palette keeps the schedule distinct without a rainbow effect. */
+:root{color:#293c3a;background:#faf9f6}
+body{background:radial-gradient(circle at 10% 0,#e9f1ed 0,transparent 31%),radial-gradient(circle at 92% 12%,#f4ede8 0,transparent 27%),#faf9f6}
+.brand-mark,.primary-button,.calendar-day.selected{background:#426f68}
+.primary-button:hover{background:#335a54}
+.eyebrow,.section-kicker{color:#668c81}
+.intro h1 em,.overview strong{color:#456f68}
+.panel,.overview{border-color:#e5e9e2;box-shadow:0 12px 32px #29484008}
+.priority-urgent-important{--priority-color:#a4565b;--priority-bg:#fbf0ef;--priority-border:#e8c1c1}
+.priority-urgent-less-important{--priority-color:#946e43;--priority-bg:#fcf5e9;--priority-border:#e6d1ac}
+.priority-less-urgent-important{--priority-color:#597d97;--priority-bg:#eef4f8;--priority-border:#bfd4e3}
+.priority-less-urgent-less-important{--priority-color:#657e75;--priority-bg:#f1f5f1;--priority-border:#cbd9d0}
+.plan-lead{background:#eef4f0}.plan-lead p{color:#59746a}
+.plan-time-metric.planned-time{background:#e8f1eb;border-color:#cbded1}.plan-time-metric.planned-time strong{color:#3c6f60}
+.study-breakdown{background:#fcfcfa;border-color:#e2e8e1;box-shadow:0 10px 26px #34494208}
+.breakdown-total{background:#e9f1ec;color:#426d60}.breakdown-track{background:#e9eeeb}
+.breakdown-item{background:var(--tone-soft);border-color:var(--tone-border)}
+.tone-work-0{--tone:#3f6d68;--tone-soft:#eff5f1;--tone-border:#d9e8df}
+.tone-work-1{--tone:#537883;--tone-soft:#eff4f5;--tone-border:#d9e5e9}
+.tone-work-2{--tone:#63748f;--tone-soft:#f0f2f7;--tone-border:#dfe3ee}
+.tone-work-3{--tone:#936767;--tone-soft:#f8f1ef;--tone-border:#ecdbd8}
+.tone-break{--tone:#f0dfbf;--tone-soft:#fcf7ed;--tone-border:#eddfc6}
+.tone-open{--tone:#e6ebe7;--tone-soft:#f7f9f6;--tone-border:#e1e7e1}
+.breakdown-segment.tone-break,.tone-break .breakdown-number{color:#614e34}.breakdown-segment.tone-open,.tone-open .breakdown-number{color:#52675e}
+.plan-progress-bar{accent-color:#537d70}.plan-progress-bar::-webkit-progress-value{background:#537d70}.plan-progress-bar::-moz-progress-bar{background:#537d70}
+.plan-complete{background:#edf5ee;border-color:#c9decf;color:#38634f}.celebration-icon{color:#658f71}
+.break-step{background:#f6f3ed;border-color:#e8ddce}.break-label,.break-step .step-time{color:#856846}.break-step input{accent-color:#98794e}
 footer{display:flex;justify-content:space-between;color:#92a393;font-size:11px;padding:28px 0 34px}
 [hidden]{display:none!important}
 @media(max-width:1000px){.intro{display:block}.overview{margin-top:24px;max-width:410px}.workspace{grid-template-columns:1fr}.calendar-panel{max-width:none}}
