@@ -9,7 +9,7 @@
 
 ## 1. Task Description
 
-Present the checked plan in a readable form so the student can begin studying. The first action is highlighted; subsequent steps have minute labels and checkboxes. This task does not save completion state or make calendar changes.
+Present the checked plan in a readable form so the student can begin studying. The first action is highlighted. A color-coded study breakdown chart shows how the available time is divided, and a larger timed checklist shows each action's minutes and clock window. Checklist progress is saved in the student's browser; the app does not make calendar changes.
 
 ## 2. Inputs
 
@@ -25,7 +25,7 @@ Present the checked plan in a readable form so the student can begin studying. T
 ### Output 1
 
 - **Output name:** Actionable browser plan
-- **Contents and format:** Highlighted first action, timed checklist, total planned minutes, a list of later work, and an optional question with an answer field and Refine plan action.
+- **Contents and format:** Highlighted first action, study breakdown chart, timed checklist and progress bar, total planned minutes, a list of later work, and an optional question with an answer field and Refine plan action.
 - **Next task or recipient:** Student begins studying and may check off displayed steps.
 - **Complete when:** The plan is visible in the browser after a successful response.
 

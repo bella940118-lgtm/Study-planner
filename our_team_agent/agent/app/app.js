@@ -242,6 +242,7 @@ function updatePlanProgress(animateCompletion = false) {
   const minutes = currentPlan.steps.reduce((sum, step, index) => sum + (completedSteps[index] ? step.minutes : 0), 0);
   $('#plan-progress').textContent = `${done} of ${work.length} study actions complete · ${formatPlanMinutes(minutes)} checked off`;
   const bar = $('#plan-progress-bar'); bar.max = Math.max(1, work.length); bar.value = done;
+  document.querySelectorAll('[data-chart-index]').forEach(item => item.classList.toggle('is-done', completedSteps[Number(item.dataset.chartIndex)]));
   const celebration = $('#plan-complete');
   const finished = work.length > 0 && done === work.length;
   celebration.hidden = !finished;
@@ -263,17 +264,50 @@ function renderPlan(plan, completed = [], note = '') {
   ]) {
     const metric = node('div', `plan-time-metric ${className}`); metric.append(node('span', '', label), node('strong', '', value)); summary.append(metric);
   }
-  const progress = node('p', 'plan-progress'); progress.id = 'plan-progress';
-  const progressBar = node('progress', 'plan-progress-bar'); progressBar.id = 'plan-progress-bar'; progressBar.max = 1; progressBar.value = 0; progressBar.setAttribute('aria-label', 'Study actions completed');
-  output.append(summary, node('h3', 'checklist-title', 'Your timed to-do list'), progress, progressBar);
-  const checklist = node('div', 'checklist');
-  let elapsed = 0;
   const studyStart = new Date(`${state.date}T${state.time}:00`);
   const clock = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const end = new Date(studyStart.getTime() + Number(state.minutes) * 60000);
+  const chart = node('section', 'study-breakdown'); chart.setAttribute('aria-labelledby', 'breakdown-title');
+  const chartHead = node('div', 'breakdown-head');
+  const chartHeading = node('div'); const heading = node('h3', '', 'Study breakdown'); heading.id = 'breakdown-title';
+  chartHeading.append(heading, node('p', '', `${dateFrom(state.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} · ${clock(studyStart)}–${clock(end)}`));
+  chartHead.append(chartHeading, node('strong', 'breakdown-total', `${formatPlanMinutes(state.minutes)} available`));
+  chart.append(chartHead, node('p', 'breakdown-hint', 'Each colored block is sized by time. Match its number to the schedule below.'));
+  const track = node('div', 'breakdown-track'); track.setAttribute('aria-hidden', 'true');
+  const legend = node('div', 'breakdown-legend');
+  let chartElapsed = 0;
+  plan.steps.forEach((step, index) => {
+    const tone = step.kind === 'break' ? 'break' : `work-${index % 4}`;
+    const segment = node('div', `breakdown-segment tone-${tone}`, String(index + 1));
+    segment.style.flexGrow = String(step.minutes); segment.dataset.chartIndex = String(index);
+    track.append(segment);
+    const item = node('div', `breakdown-item tone-${tone}`); item.dataset.chartIndex = String(index);
+    const number = node('span', 'breakdown-number', String(index + 1));
+    const details = node('div', 'breakdown-item-details');
+    details.append(node('strong', '', step.title), node('span', '', `${clock(new Date(studyStart.getTime() + chartElapsed * 60000))}–${clock(new Date(studyStart.getTime() + (chartElapsed + step.minutes) * 60000))}`));
+    item.append(number, details, node('b', 'breakdown-duration', `${step.minutes} min`));
+    legend.append(item);
+    chartElapsed += step.minutes;
+  });
+  const unallocated = Math.max(0, state.minutes - plan.total);
+  if (unallocated) {
+    const open = node('div', 'breakdown-segment tone-open', '+'); open.style.flexGrow = String(unallocated); track.append(open);
+    const item = node('div', 'breakdown-item tone-open');
+    item.append(node('span', 'breakdown-number', '+'), node('div', 'breakdown-item-details'));
+    item.querySelector('.breakdown-item-details').append(node('strong', '', 'Open time'), node('span', '', `${clock(new Date(studyStart.getTime() + plan.total * 60000))}–${clock(end)}`));
+    item.append(node('b', 'breakdown-duration', `${unallocated} min`)); legend.append(item);
+  }
+  chart.append(track, legend);
+  const progress = node('p', 'plan-progress'); progress.id = 'plan-progress';
+  const progressBar = node('progress', 'plan-progress-bar'); progressBar.id = 'plan-progress-bar'; progressBar.max = 1; progressBar.value = 0; progressBar.setAttribute('aria-label', 'Study actions completed');
+  output.append(summary, chart, node('h3', 'checklist-title', 'Your timed to-do list'), progress, progressBar);
+  const checklist = node('div', 'checklist');
+  let elapsed = 0;
   plan.steps.forEach((step, index) => {
     const isBreak = step.kind === 'break';
     const row = node('label', `plan-step${isBreak ? ' break-step' : ''}`); const checkbox = node('input'); checkbox.type = 'checkbox'; checkbox.dataset.stepIndex = String(index); checkbox.checked = completedSteps[index]; checkbox.setAttribute('aria-label', `Complete ${isBreak ? 'break' : 'step'} ${index + 1}`);
-    const body = node('span', 'step-body'); body.append(node('strong', '', `${index + 1}. ${step.title}`), node('small', '', `${step.task} · ${step.why}`));
+    const body = node('span', 'step-body');
+    body.append(node('strong', '', `${index + 1}. ${step.title}`), node('span', 'step-action', step.task), node('small', 'step-reason', `Why this step: ${step.why}`));
     if (isBreak) body.prepend(node('span', 'break-label', 'SHORT BREAK'));
     const timing = node('span', 'step-timing');
     timing.append(node('strong', 'step-time', `${step.minutes} min`), node('small', 'step-window', `${clock(new Date(studyStart.getTime() + elapsed * 60000))}–${clock(new Date(studyStart.getTime() + (elapsed + step.minutes) * 60000))}`));
