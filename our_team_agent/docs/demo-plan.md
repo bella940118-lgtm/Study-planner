@@ -17,4 +17,8 @@
 
 ## Current Readiness Limit
 
-The most recent API check returned `credit_balance_exhausted`. A live model demonstration requires adding API credits or using a funded key before class.
+NextStep now uses the Groq Chat Completions API with the `openai/gpt-oss-20b` model.
+
+The server has been updated to use Groq, but a complete live demonstration still needs to be tested locally with a valid `GROQ_API_KEY`.
+
+Before class, verify that the app generates a real AI study plan, respects the available time, and displays actionable steps.
